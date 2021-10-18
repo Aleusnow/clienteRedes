@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import bench.BenchRegistry;
 import util.PeerQueue;
 import util.Util;
 import vista.VistaCliente;
@@ -32,12 +31,13 @@ public class Peer {
 	public ServerSocket serverSocket;
         private VistaCliente vista;
 	
-	public Peer(String directory, ArrayList<String> fileNames, int numFiles, String address, int port ) throws IOException{
+	public Peer(String directory, ArrayList<String> fileNames, int numFiles, String address, int port,  VistaCliente vista ) throws IOException{
 		this.directory = directory;
 		this.fileNames = fileNames;
 		this.numFiles = numFiles;
 		this.address = address;
 		this.port = port;
+                this.vista = vista;
 		
 		peerQueue = new PeerQueue<Connection>();
 	}
@@ -138,10 +138,10 @@ public class Peer {
     	dIn.close();
     	socket.close();
     	
-    	System.out.println("Corriendo como Peer " + peerId + "! " + "tomó " + (System.currentTimeMillis() - start) + "ms para el registro");
+    	vista.entrada("Corriendo como Peer " + peerId + "! " + "tomó " + (System.currentTimeMillis() - start) + "ms para el registro");
     	//System.out.println("Took " + (System.currentTimeMillis() - start) + " ms to register in the server.");
     	//System.out.println((System.currentTimeMillis() - start) + " ms");
-    	if(BenchRegistry.times != null) BenchRegistry.times.add((System.currentTimeMillis() - start));
+    	
 	}
 
     public String[] lookup(String fileName, Socket socket, int count) throws IOException{
@@ -157,7 +157,7 @@ public class Peer {
     	dOut.flush();
     	//System.out.println("Reading from the server...");
     	
-    	System.out.println("Peer " + peerId + " - buscando el archivo. (" + count + ")");
+    	vista.entrada("Peer " + peerId + " - buscando el archivo. (" + count + ")");
     	
     	//Lectura de la dirección del peer que tiene el archivo
     	DataInputStream dIn = new DataInputStream(socket.getInputStream());
@@ -175,10 +175,10 @@ public class Peer {
     				i--;
     			}
     			String paddress[] = peerAddress[i].split(":");
-    			System.out.println("Peer " + paddress[2] + " - " + paddress[0] +":" + paddress[1] + " tiene el archivo " + fileName + "! - Buscado por el Peer " + peerId);
+    			vista.entrada("Peer " + paddress[2] + " - " + paddress[0] +":" + paddress[1] + " tiene el archivo " + fileName + "! - Buscado por el Peer " + peerId);
     		}
     	} else if(found == 0){
-    		System.out.println("Archivo no encontrado en el sistema");
+    		vista.entrada("Archivo no encontrado en el sistema");
     		peerAddress = new String[0];
     	}
     	
@@ -246,7 +246,7 @@ public class Peer {
         	try {
         		created = f.mkdirs();
         	}catch (Exception e){
-        		System.out.println("No se ha podido crear la carpeta, ¡el archivo se guardará en el directorio actual!");
+        		vista.entrada("No se ha podido crear la carpeta, ¡el archivo se guardará en el directorio actual!");
         	}
         }else {
         	created = true;
@@ -256,7 +256,7 @@ public class Peer {
         
         OutputStream out = (created) ? new FileOutputStream(f.toString() + "/" + fileName) : new FileOutputStream(fileName);
         Util.copy(in, out);
-        System.out.println("Archivo " + fileName + " recibido del peer " + peerAddress + ":" + port);
+        vista.entrada("Archivo " + fileName + " recibido del peer " + peerAddress + ":" + port);
         dOut.close();
         out.close();
         in.close();

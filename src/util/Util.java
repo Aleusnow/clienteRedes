@@ -29,7 +29,7 @@ public class Util {
         while ((count = in.read(buffer)) != -1) {
             out.write(buffer, 0, count);
         }
-        System.out.println("Download took " + (System.currentTimeMillis() - start) + " ms.");
+        System.out.println("La descarga tomo " + (System.currentTimeMillis() - start) + " ms.");
     }
 	
 	public static long toSeconds(long start, long end){
@@ -37,7 +37,7 @@ public class Util {
 	}
 	
 	public static String getExternalIP() throws IOException{
-		URL url = new URL("http://checkip.amazonaws.com/");
+		URL url = new URL("https://serverRedes.herokuapp.com/");
     	BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
     	return br.readLine();
 	}

@@ -15,24 +15,35 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import util.Util;
 import vista.VistaCliente;
 
-public class Client {
-    
-    private VistaCliente vista; 
+public class Client extends Thread {
+
+    private VistaCliente vista;
+    private String dir;
+    private String port;
+    private String serverAddress;
+    private int serverPort;
+    private Peer peer;
+    private String fileName;
+    private static String[] peerAddress = new String[0];
 
     public Client(VistaCliente vista) {
         this.vista = vista;
+        
     }
 
     public Client() {
     }
-    
 
-    public void conectarClient(String dir, String port) throws IOException {
+    public void setDatos(String dir, String port) {
+        this.dir = dir;
+        this.port = port;
+    }
+
+    public void conectarClient() throws IOException {
 
         if (dir == null) {
             vista.entrada("Debe ser java client/Client folder port");
@@ -40,8 +51,8 @@ public class Client {
         }
 
         //informacion del server
-        String serverAddress = "localhost";
-        int serverPort = 6756;
+        serverAddress = "localhost";
+        serverPort = 6756;
 
         File folder = new File(dir);
         int option;
@@ -63,9 +74,9 @@ public class Client {
                 vista.entrada("Pon un numero de puerto valido");
             }
         }
-        
+
         ArrayList<String> fileNames = Util.listFilesForFolder(folder);
-        final Peer peer = new Peer(dir, fileNames, fileNames.size(), address, portLocal);
+        peer = new Peer(dir, fileNames, fileNames.size(), address, portLocal, this.vista);
         Socket socket = null;
         try {
             socket = new Socket(serverAddress, serverPort);
@@ -95,49 +106,77 @@ public class Client {
             }
         }.start();
 
-        String[] peerAddress = new String[0];
+        vista.conectado(true);
+        vista.cambiaTitulo("----CLIENTE " + peer.getPeerId() + "----");
+        vista.entrada("\n\nPara descargar:");
+        vista.entrada("1 - Buscar un archivo");
+        vista.entrada("2 - Descargar el archivo");
 
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
-            vista.entrada("\n\nSelecciona la opcion:");
-            vista.entrada("1 - Buscar un archivo");
-            vista.entrada("2 - Descargar un archivo");
+    }
 
-            option = scanner.nextInt();
-            int optpeer;
-
-            if (option == 1) {
-                System.out.println("Introduzca el nombre del archivo:");
-                fileName = scanner.next();
-                peerAddress = peer.lookup(fileName, new Socket(serverAddress, serverPort), 1);
-            } else if (option == 2) {
-                if (peerAddress.length == 0) {
-                    vista.entrada("Busca primero el peer");
-                } else if (peerAddress.length == 1 && Integer.parseInt(peerAddress[0].split(":")[2]) == peer.getPeerId()) {
-                    vista.entrada("Este peer ya tiene el archivo, por lo tanto no lo descarga.");
-                } else if (peerAddress.length == 1) {
-                    String[] addrport = peerAddress[0].split(":");
-                    vista.entrada("Descargando desde el peer " + addrport[2] + ": " + addrport[0] + ":" + addrport[1]);
-                    peer.download(addrport[0], Integer.parseInt(addrport[1]), fileName, -1);
-                } else {
-                    vista.entrada("Selecciona de que peer deseas descargar el archivo:");
-                    for (int i = 0; i < peerAddress.length; i++) {
-                        String[] addrport = peerAddress[i].split(":");
-                        System.out.println((i + 1) + " - " + addrport[0] + ":" + addrport[1]);
-                    }
-                    optpeer = scanner.nextInt();
-                    while (optpeer > peerAddress.length || optpeer < 1) {
-                        vista.entrada("Selecciona una opcion valida:");
-                        optpeer = scanner.nextInt();
-                    }
-                    String[] addrport = peerAddress[optpeer - 1].split(":");
-                    peer.download(addrport[0], Integer.parseInt(addrport[1]), fileName, -1);
+    public void buscarArchi() throws IOException {
+        vista.limpiarPeer();
+        vista.entrada("holi laura");
+        if (vista.getTxtArchi().length() > 0) {
+            peerAddress = new String[0];
+            fileName = vista.getTxtArchi().trim();
+            peerAddress = peer.lookup(fileName, new Socket("localhost", 6756), 1);
+            if (peerAddress.length > 1) {
+                vista.entrada("Selecciona de que peer deseas descargar el archivo:");
+                for (int i = 0; i < peerAddress.length; i++) {
+                    String[] addrport = peerAddress[i].split(":");
+                    vista.entrada((i + 1) + " - " + addrport[0] + ":" + addrport[1]);
+                    vista.addPeer(i);
                 }
-            } else {
-                scanner.close();
-                vista.entrada("Peer desconectado!");
+            }
+        } else {
+            vista.entrada("Introduzca el nombre del archivo a buscar");
+        }
+    }
+
+    public void descargarArchi() throws IOException {
+        int optpeer;
+
+        if (peerAddress.length == 0) {
+            vista.entrada("Busca primero el peer");
+        } else if (peerAddress.length == 1 && Integer.parseInt(peerAddress[0].split(":")[2]) == peer.getPeerId()) {
+            vista.entrada("Este peer ya tiene el archivo, por lo tanto no lo descarga.");
+        } else if (peerAddress.length == 1) {
+            String[] addrport = peerAddress[0].split(":");
+            vista.entrada("Descargando desde el peer " + addrport[2] + ": " + addrport[0] + ":" + addrport[1]);
+            peer.download(addrport[0], Integer.parseInt(addrport[1]), fileName, -1);
+            vista.entrada("\n\nPara descargar:");
+            vista.entrada("1 - Buscar un archivo");
+            vista.entrada("2 - Descargar el archivo");
+        } else {
+            optpeer = vista.getPeerNum();
+            if (optpeer > peerAddress.length || optpeer < 1) {
+                vista.entrada("Selecciona una Peer valida:");
                 return;
             }
+            String[] addrport = peerAddress[optpeer - 1].split(":");
+            peer.download(addrport[0], Integer.parseInt(addrport[1]), fileName, -1);
+            vista.entrada("\n\nPara descargar:");
+            vista.entrada("1 - Buscar un archivo");
+            vista.entrada("2 - Descargar el archivo");
+        }
+    }
+
+    public void desconect() {
+
+        vista.entrada("Peer desconectado!");
+        vista.conectado(false);
+        this.stop();
+        return;
+    }
+
+    @Override
+    public void run() {
+        vista.entrada("Estableciendo conexion. Por favor espere...");
+        try {
+            conectarClient();
+        } catch (IOException ioe) {
+            //JOptionPane.showMessageDialog(vista,"Excepcion inesperada: " + ioe.getMessage());
 
         }
     }

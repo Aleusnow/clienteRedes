@@ -14,11 +14,13 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.JTextField;
 
 public class VistaCliente extends javax.swing.JFrame {
 
     private Client cliente;
     private JFileChooser fileChooser;
+    private boolean conectado;
 
     /**
      * Creates new form VistaCliente
@@ -55,6 +57,8 @@ public class VistaCliente extends javax.swing.JFrame {
         txtArchi = new javax.swing.JTextField();
         btnBuscarArchi = new javax.swing.JButton();
         btnDescargar = new javax.swing.JButton();
+        cbxPeer = new javax.swing.JComboBox<>();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -81,6 +85,7 @@ public class VistaCliente extends javax.swing.JFrame {
         lblSelec.setFont(new java.awt.Font("Comic Sans MS", 0, 18)); // NOI18N
         lblSelec.setText("/ / / Selecciona el archivo que quieres descargar / / / ");
 
+        txtDirectorio.setEditable(false);
         txtDirectorio.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtDirectorioActionPerformed(evt);
@@ -110,31 +115,51 @@ public class VistaCliente extends javax.swing.JFrame {
 
         btnBuscarArchi.setFont(new java.awt.Font("Comic Sans MS", 0, 13)); // NOI18N
         btnBuscarArchi.setText("Buscar");
+        btnBuscarArchi.setEnabled(false);
+        btnBuscarArchi.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBuscarArchiActionPerformed(evt);
+            }
+        });
 
         btnDescargar.setFont(new java.awt.Font("Comic Sans MS", 0, 13)); // NOI18N
         btnDescargar.setText("DESCARGAR");
+        btnDescargar.setEnabled(false);
+        btnDescargar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDescargarActionPerformed(evt);
+            }
+        });
+
+        cbxPeer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbxPeerActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setFont(new java.awt.Font("Comic Sans MS", 0, 13)); // NOI18N
+        jLabel1.setText("Seleccione el Peer de descarga: ");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap(31, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(btnAjustar)
-                    .addComponent(lblSelec)
-                    .addComponent(lblInfo)
-                    .addComponent(lblTitulo)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 463, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblIntro)
+                    .addComponent(lblSelec1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtArchi, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtArchi, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnBuscarArchi))
                     .addComponent(btnDescargar)
-                    .addComponent(lblSelec1)
+                    .addComponent(lblTitulo)
+                    .addComponent(lblIntro)
+                    .addComponent(btnAjustar)
+                    .addComponent(lblSelec)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblPuerto)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -144,8 +169,13 @@ public class VistaCliente extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtDirectorio, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnBuscar)))
-                .addContainerGap())
+                        .addComponent(btnBuscar))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cbxPeer, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lblInfo))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -170,15 +200,19 @@ public class VistaCliente extends javax.swing.JFrame {
                     .addComponent(jLabel3)
                     .addComponent(txtArchi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnBuscarArchi))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(cbxPeer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(btnDescargar)
-                .addGap(31, 31, 31)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
                 .addComponent(lblInfo)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblSelec1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(24, 24, 24))
         );
 
         pack();
@@ -186,11 +220,8 @@ public class VistaCliente extends javax.swing.JFrame {
 
     private void btnAjustarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAjustarActionPerformed
         cliente = new Client(this);
-        try {
-            cliente.conectarClient(txtDirectorio.getText(), txtPuerto.getText());
-        } catch (IOException ex) {
-            Logger.getLogger(VistaCliente.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        cliente.setDatos(txtDirectorio.getText(), txtPuerto.getText());
+        cliente.start();
     }//GEN-LAST:event_btnAjustarActionPerformed
 
     private void txtDirectorioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDirectorioActionPerformed
@@ -206,6 +237,56 @@ public class VistaCliente extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnBuscarActionPerformed
 
+    private void cbxPeerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxPeerActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbxPeerActionPerformed
+
+    private void btnBuscarArchiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarArchiActionPerformed
+        try {
+            cliente.buscarArchi();
+        } catch (IOException ex) {
+            Logger.getLogger(VistaCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_btnBuscarArchiActionPerformed
+
+    private void btnDescargarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDescargarActionPerformed
+        try {
+            cliente.descargarArchi();
+        } catch (IOException ex) {
+            Logger.getLogger(VistaCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_btnDescargarActionPerformed
+    
+    public void cambiaTitulo ( String titulito){
+    
+        lblTitulo.setText(titulito);
+    }
+
+    public String getTxtArchi() {
+        return txtArchi.getText();
+    }
+    
+    
+    public int getPeerNum() {
+        return Integer.parseInt(cbxPeer.getSelectedItem().toString());
+    }
+    
+    public void addPeer(int num) {
+        String opc = Integer.toString(num + 1);
+        cbxPeer.addItem(opc);
+    }
+    
+    public void limpiarPeer(){
+        cbxPeer.removeAllItems();
+    }
+    
+    public void conectado(boolean conec) {
+        txtPuerto.setEnabled(!conec);
+        btnBuscar.setEnabled(!conec);
+        btnAjustar.setEnabled(!conec);
+        btnDescargar.setEnabled(conec);
+        btnBuscarArchi.setEnabled(conec);
+    }
     
     public void entrada(String msg) {
         txtaInfo.append(msg + "\n");
@@ -252,6 +333,8 @@ public class VistaCliente extends javax.swing.JFrame {
     private javax.swing.JButton btnBuscar;
     private javax.swing.JButton btnBuscarArchi;
     private javax.swing.JButton btnDescargar;
+    private javax.swing.JComboBox<String> cbxPeer;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblDirec;
